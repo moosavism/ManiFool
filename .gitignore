@@ -1,0 +1,10 @@
+*.__pycache__/
+*.pyc
+*.mat
+data/
+ImageNet/
+ILSVRC_val/
+*.orig
+*.npy
+*.npz
+*.png
