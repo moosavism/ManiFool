@@ -8,3 +8,4 @@ ILSVRC_val/
 *.npy
 *.npz
 *.png
+.idea/
