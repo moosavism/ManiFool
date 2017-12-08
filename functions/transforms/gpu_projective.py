@@ -101,13 +101,6 @@ int nChannels
 }
 """
 
-# try:
-#     drv.Context.get_device()
-# except Exception as e:
-#     print('E')
-#     import pycuda.autoinit
-
-
 mod = SourceModule(_kernel_)
 projective_warp = mod.get_function("projective_warp")
 
@@ -115,7 +108,15 @@ def proj_warp_gpu(H_gpu,
                   img_gpu,
                   img_wrapped_gpu,
                   threadsPerBlock = 1024):
+    """
+    Applies the geodesic transformation using the transformation matrix H_gpu.
 
+    :CUDA Tensor H_gpu: 3x3 transformation matrix
+    :CUDA Tensor img_gpu: the image to be transformed
+    :CUDA Tensor img_wrapped_gpu: container for the transformed image. This will become the output image.
+    :int threadsPerBlock: number of CUDA threads per block (must be multiple of 32, 1024 is max)
+
+    """
     if not isinstance(img_gpu,torch.cuda.FloatTensor):
         raise TypeError(type(img_gpu))
     if not isinstance(img_wrapped_gpu,torch.cuda.FloatTensor):
@@ -127,8 +128,6 @@ def proj_warp_gpu(H_gpu,
     ny,nx = img_gpu.size()[1:]
     nPts = ny*nx
 
-    # if nPts < threadsPerBlock:
-    #     threadsPerBlock = nPts
     nBlocks = int(np.ceil(nPts/threadsPerBlock))
 
     projective_warp(Holder(img_gpu),

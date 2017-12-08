@@ -5,9 +5,9 @@ from pycuda.compiler import SourceModule
 
 from .pytorchholder import Holder
 
+
 _kernel_ = """
 #include <stdio.h>
-
 __global__ void forward_diff_image_gradient(
 float* img,
 float* gradient_x,
@@ -18,6 +18,18 @@ int ny,
 int nChannels
 )
 {
+/*  Calculates the gradient of an image in a forward difference sense (f(x+1)-f(x))
+*  
+*   Inputs:
+*   float* img: The image in question
+*   float* gradient_x: A container array to output the gradient in x direction
+*   float* gradient_y: A container array to output the gradient in y direction
+*   int nPts: number of pixels in the image
+*   int nx: width of the image
+*   int ny: height of the image
+*   int nChannels: number of channels
+*/
+
     int idx = threadIdx.x + blockIdx.x*blockDim.x;
 
     if (idx>=nPts)
@@ -34,7 +46,7 @@ int nChannels
     idx01 = idx + 1;
     idx10 = idx + nx;
 
-
+    // loop on different color channels
     for (int i=0;i < nChannels; i++){
        f00 = img[idx + i*nPts];//f[x,y]
 
@@ -68,6 +80,18 @@ int ny,
 int nChannels
 )
 {
+/*  Calculates the gradient of an image using central difference (f(x+1)-f(x-1))
+*  
+*   Inputs:
+*   float* img: The image in question
+*   float* gradient_x: A container array to output the gradient in x direction
+*   float* gradient_y: A container array to output the gradient in y direction
+*   int nPts: number of pixels in the image
+*   int nx: width of the image
+*   int ny: height of the image
+*   int nChannels: number of channels
+*/
+
     int idx = threadIdx.x + blockIdx.x*blockDim.x;
 
     if (idx>=nPts)
@@ -86,7 +110,7 @@ int nChannels
     idx0_1 = idx - 1;
     idx_10 = idx - nx;
 
-
+    // loop on different color channels 
     for (int i=0;i < nChannels; i++){
 
        if (x == nx-1)
@@ -129,7 +153,18 @@ diff_gradient = mod.get_function("forward_diff_image_gradient")
 cent_gradient = mod.get_function("central_diff_image_gradient")
 
 def gradient(im_gpu, grad_type = 1, threadsPerBlock = 1024):
+    """
+    Calculates the image gradient using GPU. Requires PyCUDA to work.
 
+    Inputs:
+    :CUDA Tensor im_gpu: the image whose gradient is calculated
+    :int grad_type: gradient method (1:forward difference, 2:central difference)
+    :int threadsPerBlock: number of CUDA threads per block (must be multiple of 32, 1024 is max)
+
+    Outputs:
+    :CUDA Tensor grad_x: image gradient in x direction
+    :CUDA Tensor grad_y: image gradient in y direction
+    """
     if not isinstance(im_gpu,torch.cuda.FloatTensor):
         raise TypeError(type(im_gpu))
 

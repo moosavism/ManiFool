@@ -25,7 +25,7 @@ transform = transforms.Compose([transforms.ToTensor(),
                                 ])
 
 #Getting the network and the dataset
-pretrained = torch.load('./ckpt.t7')
+pretrained = torch.load('./models/cifar_net.t7')
 net = pretrained['net']
 net.train(mode=False)
 

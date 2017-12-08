@@ -22,19 +22,10 @@ start_epoch = 0  # start from epoch 0 or last checkpoint epoch
 num_of_epochs = 5
 
 # Model
-if args.resume:
-    # Load checkpoint.
-    print('Resuming from checkpoint..')
-    assert os.path.isdir('checkpoint'), 'Error: no checkpoint directory found!'
-    checkpoint = torch.load('./checkpoint/fine_tune.t7')
-    net = checkpoint['net']
-    best_acc = checkpoint['acc']
-    start_epoch = checkpoint['epoch']
-else:
-    print('Loading the model..')
-    pretrained = torch.load('./ckpt.t7')
-    net = pretrained['net']
-    best_acc = pretrained['acc']
+print('Loading the model..')
+pretrained = torch.load('./models/cifar_net.t7')
+net = pretrained['net']
+best_acc = pretrained['acc']
 
 # Data
 transform_test = transforms.Compose([

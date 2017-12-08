@@ -55,7 +55,7 @@ transform = transforms.Compose([transforms.ToTensor(),
 #Getting the network and the dataset
 net = []
 if 'org' in network:
-    pretrained = torch.load('./ckpt.t7')
+    pretrained = torch.load('./models/cifar_net.t7')
     net.append(pretrained['net'])
     net[-1].train(mode=False)
 if 'epoch0' in network:

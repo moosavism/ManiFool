@@ -6,6 +6,17 @@ import torch
 from skimage.measure import compare_ssim
 
 def prepare_image(I, mean, std):
+    """
+    Prepares an image for imshow, i.e. denormalizes or rescales the image.
+
+    Inputs:
+    :Tensor I: the image to be prepared
+    :(double,double,double) mean: original mean values of the pixels for denormalization(the values are ordered as (R,G,B))
+    :(double,double,double) std: original standard deviations of the pixels for denormalization(the values are ordered as (R,G,B))
+
+    Outputs:
+    :Tensor I: the prepared image
+    """
 
     I = I.clone()
 
@@ -18,7 +29,19 @@ def prepare_image(I, mean, std):
     return I
 
 def compare_images (I, I_t, label1, label2, mean=[0], std=[1], block=False):
+    """
+    Draws two images side by side on a figure for comparing.
 
+    Inputs:
+    :Tensor I: first image, will be printed on left
+    :Tensor I_t: second image, will be printed on right
+    :String label1: label of the first image
+    :String label2: label of the second image
+    :(double,double,double) mean: original mean values of the pixels for denormalization(the values are ordered as (R,G,B))
+    :(double,double,double) std: original standard deviations of the pixels for denormalization(the values are ordered as (R,G,B))
+    :bool block: if True, the printed figure pauses the program.
+
+    """
 
     I = prepare_image(I,mean,std)
     I_t = prepare_image(I_t,mean,std)
@@ -39,42 +62,10 @@ def compare_images (I, I_t, label1, label2, mean=[0], std=[1], block=False):
     ax2.set_xlabel(label2)
 
     plt.show(block=block)
-    # pad =round(I.size()[1]/10.)
-    #
-    # imglist = make_grid([I, I_t],padding = pad)
-    # plt.imshow(np.transpose(imglist.numpy(),(1,2,0)))
-    # plt.show()
-
-def compare_ssim_images (I_org, I_p, I_t, mean, std):
-
-    I_p = prepare_image(I_p, mean, std).permute(1,2,0).numpy()
-    I_org = prepare_image(I_org, mean, std).permute(1,2,0).numpy()
-    I_t = prepare_image(I_t, mean, std).permute(1,2,0).numpy()
-
-    ssim_p = compare_ssim(I_org, I_p, multichannel=True, gaussian_weigths=True, sigma=1.5, use_sample_covariance=False)
-    ssim_t = compare_ssim(I_org, I_t, multichannel=True, gaussian_weigths=True, sigma=1.5, use_sample_covariance=False)
-
-    # I_p[I_p>1.0] = 1.0
-    print(I_p.shape)
-
-    plt.figure()
-    ax1 = plt.subplot(121)
-    plt.imshow(I_p)
-    ax2 = plt.subplot(122)
-    plt.imshow(I_t)
-
-    ax1.set_title('Perturbed Image')
-    ax1.set_xlabel('SSIM: {}'.format(ssim_p))
-    ax2.set_title('Transformed Image')
-    ax2.set_xlabel('SSIM: {}'.format(ssim_t))
-
-    plt.show(block=False)
-
-    return ssim_p,ssim_t
 
 class Denormalize(object):
-    """ Given mean: (R, G, B) and std: (R, G, B),
-    will denormalize each channel of the torch.*Tensor, i.e.
+    """
+    Given mean: (R, G, B) and std: (R, G, B), will denormalize each channel of the torch.*Tensor, i.e.
     channel = (channel*std + mean)
     """
     def __init__(self, mean, std):
