@@ -1,10 +1,10 @@
 import numpy as np
 import torch
 import torch.cuda
+import pycuda.autoinit
 
 from ..helpers.pytorchholder import Holder
 
-x = torch.cuda.FloatTensor(8)
 from pycuda.compiler import SourceModule
 
 _kernel_ = """
@@ -100,6 +100,8 @@ int nChannels
     return;
 }
 """
+
+x = torch.cuda.FloatTensor(8)
 
 mod = SourceModule(_kernel_)
 projective_warp = mod.get_function("projective_warp")

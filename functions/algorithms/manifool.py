@@ -89,12 +89,12 @@ def manifool_single_target(I_org, net, mode, target,
         try:
             u_tar = torch.gels(w_tar,J_n)[0]
             u_tar = u_tar[:J_n.size()[1]]
-            u_tar.squeeze_()
             try:
                 dist = abs(output.data[0, target] - output.data[0, k_org]) / (J_n.mm(u_tar)).norm()
             except ZeroDivisionError:
                 dist = np.inf
-        except:
+            u_tar.squeeze_()
+        except Exception as e:
             u_tar = None
             dist = np.inf
 

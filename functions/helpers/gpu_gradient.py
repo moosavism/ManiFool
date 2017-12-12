@@ -2,6 +2,7 @@ import numpy as np
 import torch
 import torch.cuda
 from pycuda.compiler import SourceModule
+import pycuda.autoinit
 
 from .pytorchholder import Holder
 
@@ -19,7 +20,7 @@ int nChannels
 )
 {
 /*  Calculates the gradient of an image in a forward difference sense (f(x+1)-f(x))
-*  
+*
 *   Inputs:
 *   float* img: The image in question
 *   float* gradient_x: A container array to output the gradient in x direction
@@ -81,7 +82,7 @@ int nChannels
 )
 {
 /*  Calculates the gradient of an image using central difference (f(x+1)-f(x-1))
-*  
+*
 *   Inputs:
 *   float* img: The image in question
 *   float* gradient_x: A container array to output the gradient in x direction
@@ -110,7 +111,7 @@ int nChannels
     idx0_1 = idx - 1;
     idx_10 = idx - nx;
 
-    // loop on different color channels 
+    // loop on different color channels
     for (int i=0;i < nChannels; i++){
 
        if (x == nx-1)

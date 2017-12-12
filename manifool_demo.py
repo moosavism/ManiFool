@@ -1,5 +1,6 @@
 import os
 import time
+from PIL import Image
 
 import numpy as np
 import torchvision
@@ -14,7 +15,7 @@ net.eval()
 net.train(mode=False)
 
 
-#get images
+#load the image
 mean = [ 0.485, 0.456, 0.406 ]
 std = [ 0.229, 0.224, 0.225 ]
 transform = transforms.Compose([transforms.Scale(256),
@@ -23,12 +24,10 @@ transform = transforms.Compose([transforms.Scale(256),
                                 transforms.Normalize(mean = mean,
                                                      std = std)
                                 ])
-
-dset_path = './ILSVRC_val'
-dset = torchvision.datasets.ImageFolder(dset_path,transform)
-i = np.random.randint(0,len(dset))
-
 dn = Denormalize(mean,std)
+
+img_pil = Image.open('./test_image.png')
+im = transform(img_pil)
 
 # get classes
 file_name = 'synset_words.txt'
@@ -41,33 +40,38 @@ with open(file_name) as class_file:
         classes.append(line.strip().split(' ', 1)[1].split(', ', 1)[0])
 classes = tuple(classes)
 
-k = 47556
-im = dset.__getitem__(k)[0]
+# Algorithm Parameters
+maxIt = 100 # maximum number of iterations for binary manifool
+mode = 'similarity' # transformation set
+gamma = 0 # momentum parameter
+geo_step = 0.05 # step size for geodesic distance calculation
+batch_size = 3 # number of transformations to batch for line search
+cuda_on = True # use GPU or not
+numerical = True # use numerical gradients or analytical
+step_sizes = np.logspace(-2,np.log10(1),20) # step sizes for line search
 
-
-maxIt = 100
-
-mode = 'similarity'
+# Main Algorithm
 t = time.time()
-step_sizes = np.logspace(-2,np.log10(1),20)
 out = manifool(im, net, mode,
                maxIter=maxIt,
                step_sizes = step_sizes,
-               gamma = 0,
-               geo_step = 0.05,
-               batch_size=3,
-               cuda_on=True,
+               gamma = gamma,
+               geo_step = geo_step,
+               batch_size = batch_size,
+               cuda_on = cuda_on,
                crop=224,
-               numerical = True)
+               numerical = numerical)
 
 elapsed = time.time()-t
 
+# Depack the outputs
 k_org = out['org_label']
 k_f = out['fooling_label']
 tar = out['target']
 geo_dist = out['geo_dist']
 II = out['output_image']
 
+# PRint the results
 print('\n\n\nFinal Result -- Multi Target:')
 if k_org != tar:
     print("Original Output: {}({})\nTarget {}({})\nNew Output: {}({})".format(
