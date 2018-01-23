@@ -42,7 +42,7 @@ with open(file_name) as class_file:
         classes.append(line.strip().split(' ', 1)[1].split(', ', 1)[0])
 classes = tuple(classes)
 
-k = 47556
+k = 3507
 im = dset.__getitem__(k)[0]
 
 

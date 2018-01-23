@@ -12,13 +12,14 @@ from functions.helpers.general import center_crop_tensor
 from functions.helpers.plot_helpers import Denormalize
 
 #Parameter
-num_trials = 100
+num_trials = 50
 maxIt = 100
 mode = 'similarity'
-network = 'resnet50'
+network = 'resnet34'
 step_sizes = np.logspace(-2,np.log10(1),20)
 rng_seed = 2323
 gamma = 0.2
+geodesic_score_step_size = 0.05;
 torch.set_num_threads(8)
 
 mean = [ 0.485, 0.456, 0.406 ]
@@ -87,7 +88,7 @@ for i,k in enumerate(im_ind):
                    crop = 224,
                    batch_size=2,
                    verbose = False,
-                   geo_step = 0.01)
+                   geo_step = geodesic_score_step_size)
 
     geo_sc = out['geo_dist']
     tar = out['target']
@@ -102,17 +103,11 @@ for i,k in enumerate(im_ind):
         total_mf += geo_sc
         successful_dur_manifool += t1 - t0
 
-        im_c = center_crop_tensor(im,224)
-        fn = './images/ImageNet/projective/original/image_' + str(k) + '_' + classes[k_org] + '.png'
-        torchvision.utils.save_image(dn(im_c),fn)
-        fn = './images/ImageNet/projective/transformed/image_'+ mode + '_' + str(k) + '_' + classes[new_label] + '.png'
-        torchvision.utils.save_image(dn(im_out),fn)
-
     num_of_fail += (k_org == tar)
 
     print('Iteration {}, Image {}.'
     ' Current Avg. score: {}'.format(i,k,total_mf/(i-num_of_fail+1)))
-    print('Duration: {}'.format(t1-t0))
+    print('Duration: {}'.format(successful_dur_manifool/(i+1)))
 
 
 elapsed = time.time()-t
