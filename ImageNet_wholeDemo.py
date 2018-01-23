@@ -14,11 +14,11 @@ from functions.helpers.plot_helpers import Denormalize
 #Parameter
 num_trials = 100
 maxIt = 100
-mode = 'projective'
-network = 'resnet18'
-step_sizes = np.logspace(-2,np.log10(1),20)*1e-2
+mode = 'similarity'
+network = 'resnet50'
+step_sizes = np.logspace(-2,np.log10(1),20)
 rng_seed = 2323
-gamma = 0
+gamma = 0.2
 torch.set_num_threads(8)
 
 mean = [ 0.485, 0.456, 0.406 ]
@@ -43,7 +43,7 @@ with open(file_name) as class_file:
         classes.append(line.strip().split(' ', 1)[1].split(', ', 1)[0])
 classes = tuple(classes)
 
-#Getting the network and the dataset
+#Loading the network
 if network == 'resnet18':
     net = torchvision.models.resnet18(pretrained = True)
 elif network == 'resnet34':
@@ -62,7 +62,8 @@ elif network == 'vgg16':
 net.eval()
 net.train(mode=False)
 
-dset_path = './ILSVRC_val'
+#Loading the dataset
+dset_path = './ILSVRC_val'#Should be changed with the path to the dataset
 dataset = torchvision.datasets.ImageFolder(dset_path,transform)
 random.seed(rng_seed)
 im_ind = random.sample(range(len(dataset)),num_trials)

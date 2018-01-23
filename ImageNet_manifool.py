@@ -9,7 +9,7 @@ from functions.helpers.general import center_crop_tensor
 from functions.helpers.plot_helpers import compare_images, Denormalize
 
 # Load the network
-net = torchvision.models.resnet18(pretrained = True)
+net = torchvision.models.resnet50(pretrained = True)
 net.eval()
 net.train(mode=False)
 
@@ -24,7 +24,8 @@ transform = transforms.Compose([transforms.Scale(256),
                                                      std = std)
                                 ])
 
-dset_path = './ILSVRC_val'
+#Loading the dataset
+dset_path = './ILSVRC_val'#Should be changed with the path to the dataset
 dset = torchvision.datasets.ImageFolder(dset_path,transform)
 i = np.random.randint(0,len(dset))
 
