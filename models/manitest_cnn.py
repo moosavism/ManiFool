@@ -14,7 +14,7 @@ class ManitestMNIST_net(nn.Module):
         self.pool = nn.MaxPool2d(2,2)
 
         #Loading the weights and biases
-        mat_contents = sio.loadmat('functions/helpers/manitestcnn.mat')
+        mat_contents = sio.loadmat('models/manitestcnn.mat')
         filters1 = mat_contents['filters1']
         filters2 = mat_contents['filters2']
         filtersfc = mat_contents['filtersfc']

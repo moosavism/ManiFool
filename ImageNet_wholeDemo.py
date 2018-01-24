@@ -113,7 +113,7 @@ for i,k in enumerate(im_ind):
 
     print('Iteration {}, Image {}.'
     ' Current Avg. score: {}'.format(i,k,total_mf/(i-num_of_fail+1)))
-    print('Duration: {}'.format(successful_dur_manifool/(i+1)))
+    print('Avg. Duration: {}'.format(successful_dur_manifool/(i+1)))
     print('Confidence: {}'.format(conf_max))
 
 elapsed = time.time()-t
