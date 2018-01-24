@@ -5,6 +5,8 @@ from datetime import datetime
 
 import numpy as np
 import torch
+from torch.nn.functional import softmax
+from torch.autograd import Variable
 import torchvision
 import torchvision.transforms as transforms
 from functions.algorithms.manifool import manifool
@@ -12,7 +14,7 @@ from functions.helpers.general import center_crop_tensor
 from functions.helpers.plot_helpers import Denormalize
 
 #Parameter
-num_trials = 50
+num_trials = 100
 maxIt = 100
 mode = 'similarity'
 network = 'resnet34'
@@ -72,6 +74,7 @@ im_ind = random.sample(range(len(dataset)),num_trials)
 num_of_fail = 0
 total_mf = 0
 successful_dur_manifool = 0
+conf_tot = 0
 t = time.time()
 geo_scores = []
 for i,k in enumerate(im_ind):
@@ -102,19 +105,23 @@ for i,k in enumerate(im_ind):
         geo_scores.append(geo_sc)
         total_mf += geo_sc
         successful_dur_manifool += t1 - t0
+        conf = softmax(net(Variable(im_out.unsqueeze(0))))
+        conf_max = torch.max(conf.data)
+        conf_tot += conf_max
 
     num_of_fail += (k_org == tar)
 
     print('Iteration {}, Image {}.'
     ' Current Avg. score: {}'.format(i,k,total_mf/(i-num_of_fail+1)))
     print('Duration: {}'.format(successful_dur_manifool/(i+1)))
-
+    print('Confidence: {}'.format(conf_max))
 
 elapsed = time.time()-t
 
 fail_percent = num_of_fail/num_trials*100
 avg_mf = total_mf/(num_trials - num_of_fail)
 avg_succ_dur = successful_dur_manifool/(num_trials-num_of_fail)
+avg_conf = conf_tot/(num_trials-num_of_fail)
 
 file_name = 'ImageNet_geo_scores_var_'+mode + '_' + network
 np.save(file_name, geo_scores)
@@ -126,8 +133,9 @@ info_str = ("\n"+"-"*13+"Manifool ImageNet Demo"+"-"*13+"\nTransformation: {}\n"
 log_str = ("\n"+"-"*20+"Results"+"-"*21+"\nNet not fooled for {}%  of images\nTime elapsed for whole "
           "loop: {:.2f} seconds\nAverage duration for an image: {:.4f} seconds\n"
           "Average duration for successul computations: {:.4f} seconds\n"
-          "Average Score(Calculated Directly): {}\n\n".format(
-          fail_percent, elapsed, elapsed/num_trials, avg_succ_dur, avg_mf))
+          "Average Score(Calculated Directly): {}\n"
+          "Average confidence: {}\n".format(
+          fail_percent, elapsed, elapsed/num_trials, avg_succ_dur, avg_mf, avg_conf))
 
 print(info_str)
 print(log_str)
